@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>скинчеки</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: #4b2840;
+            background: radial-gradient(circle at top, #fff9fc, #ffe8f1);
+        }
+
+        header {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 24px 18px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back, .wallet {
+            padding: 11px 17px;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 5px 0 #f4bfd1;
+            font-weight: bold;
+        }
+
+        .back { color: #a84472; text-decoration: none; }
+        .wallet { white-space: nowrap; }
+
+        main {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 18px 18px 60px;
+            text-align: center;
+        }
+
+        h1 { margin: 24px 0 8px; font-size: clamp(28px, 6vw, 44px); }
+        .intro { margin-bottom: 28px; color: #8b5c75; }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 20px;
+        }
+
+        .skin {
+            padding: 14px;
+            border: 3px solid #ffb5d2;
+            border-radius: 23px;
+            background: #fff;
+            box-shadow: 0 8px 0 #f7c8da;
+        }
+
+        .skin.selected { border-color: #ff5b9e; }
+
+        .preview {
+            position: relative;
+            display: grid;
+            place-items: center;
+            height: 180px;
+            overflow: hidden;
+            border-radius: 17px;
+            background: linear-gradient(145deg, #ffe7f1, #fff5fa);
+            font-size: 88px;
+        }
+
+        .preview img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .skin.locked .preview img { filter: blur(9px); opacity: .65; }
+
+        .skin.locked .preview::after {
+            content: "🔒";
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: #fff5fa44;
+            font-size: 42px;
+        }
+
+        .skin h2 { margin: 15px 0 7px; font-size: 19px; }
+        .cost { min-height: 20px; margin: 0 0 12px; color: #a55e80; }
+
+        .skin button {
+            width: 100%;
+            min-height: 42px;
+            border: 0;
+            border-radius: 13px;
+            background: #ff69a6;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .skin button:disabled { background: #e8bfd0; cursor: default; }
+        #status { min-height: 24px; color: #a84472; font-weight: bold; }
+
+        .unlock-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: none;
+            place-items: center;
+            background: #4b2840aa;
+        }
+
+        .unlock-screen.show { display: grid; }
+
+        .unlock-card {
+            width: min(90vw, 350px);
+            padding: 25px;
+            border: 4px solid #ff91bb;
+            border-radius: 25px;
+            background: white;
+            text-align: center;
+            box-shadow: 0 15px 35px #4b284055;
+            animation: skinReveal 700ms ease-out;
+        }
+
+        .unlock-card img {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+        }
+
+        .unlock-card button {
+            padding: 12px 25px;
+            border: 0;
+            border-radius: 14px;
+            background: #ff69a6;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        @keyframes skinReveal {
+            0%   { transform: scale(.2) rotate(-12deg); opacity: 0; }
+            50%  { transform: scale(1.18) rotate(5deg); opacity: 1; }
+            75%  { transform: scale(.92) rotate(-3deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+
+.wallet {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 14px 7px 7px;
+    border: 2px solid #ff91bb;
+    border-radius: 30px;
+    background: white;
+    box-shadow: 0 5px 0 #efafc8;
+    color: #a8326b;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.pink-coin {
+    box-sizing: content-box;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffc6e0, #f5509d);
+    border: 2px solid #d94487;
+    color: #b82d70;
+    font-size: 22px;
+    font-weight: bold;
+    box-shadow: inset 0 2px 3px #ffffff88;
+}
+
+@keyframes pageAppear {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+body {
+    animation: pageAppear 220ms ease-out;
+    transition: opacity 180ms ease;
+}
+
+body.page-leaving {
+    opacity: 0;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body {
+        animation: none;
+        transition: none;
+    }
+}
+
+
+
+#cases { margin-bottom: 36px; }
+.case-card { display: flex; flex-direction: column; align-items: center; padding: 22px 18px; background: linear-gradient(155deg,#fffafd,#fff0f6); font-family: "Trebuchet MS", Arial, sans-serif; }
+.case-icon { display: block; width: 144px; height: 144px; object-fit: contain; image-rendering: pixelated; margin: 0 auto 18px; filter: drop-shadow(0 7px 5px #b9437426); }
+.case-card h2 { margin: 0 0 10px; color: #96345f; font-size: 23px; font-weight: 800; }
+.case-contents { color: #84546b; font-size: 16px; font-weight: 700; line-height: 1.6; }
+.case-odds { margin: auto 0 16px; color: #94677c; font-size: 13px; font-weight: 600; line-height: 1.5; }
+.case-card button { font-family: inherit; font-weight: 800; padding: 12px; }
+#caseReel { position: relative; width: 100%; height: 112px; margin: 18px 0; overflow: hidden; border: 2px solid #ff91bb; border-radius: 16px; background: #fff0f5; }
+#caseReel::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; transform: translateX(-50%); background: #a8326b; pointer-events: none; }
+#caseTrack { display: flex; gap: 12px; width: max-content; height: 100%; align-items: center; }
+#caseTrack img { flex: 0 0 100px; width: 100px; height: 90px; padding: 5px; border-radius: 12px; background: white; object-fit: contain; }
+#caseReel[hidden], #unlockedImg[hidden] { display: none; }
+
+    .unlock-card { position: relative; isolation: isolate; }
+    .unlock-screen.case-opening { background: #241026e8; }
+    .case-opening .unlock-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(48px, auto) 220px minmax(48px, auto) auto;
+        align-items: center;
+        width: min(92vw, 430px);
+        border-color: #ffd2eb;
+        box-shadow: 0 0 35px #ff69a666, 0 20px 70px #16061999;
+        animation: caseWindowEnter 450ms ease-out both;
+    }
+    .case-opening #unlockTitle { grid-area: 1 / 1; margin: 0; font-weight: 700; }
+    .case-opening #unlockedName { grid-area: 3 / 1; margin: 8px 0; }
+    .case-opening #unlockClose { grid-area: 4 / 1; justify-self: center; }
+    .case-opening .case-charge,
+    .case-opening #caseReel,
+    .case-opening .unlock-card > #unlockedImg,
+    .case-opening .unlock-card > .smoke-sprite {
+        grid-area: 2 / 1;
+        justify-self: center;
+    }
+    .case-opening #unlockClose:disabled { opacity: .45; cursor: wait; }
+    .case-opening .unlock-card::before {
+        content: ""; position: absolute; inset: 35px -10px;
+        z-index: -1; pointer-events: none;
+        background: radial-gradient(ellipse, #ffc0e555, transparent 68%);
+        animation: caseHalo 3s ease-in-out infinite alternate;
+    }
+    .case-charge {
+        display: grid; place-items: center; height: 210px; width: 100%;
+        background: radial-gradient(ellipse, #ff91bb77, transparent 65%);
+        transition: opacity 350ms ease, transform 350ms ease;
+    }
+    .case-charge.case-fading { opacity: 0; transform: scale(1.12); }
+    .case-charge img {
+        width: 160px; height: 160px; object-fit: contain;
+        image-rendering: pixelated;
+        animation: caseCharge 1800ms ease-in-out forwards;
+    }
+    .case-opening #caseReel {
+        box-shadow: 0 0 20px #ff69a655;
+        animation: caseReelEnter 450ms ease-out both;
+        transition: opacity 350ms ease;
+    }
+    .case-opening #caseReel.case-fading { animation: none; opacity: 0; }
+    #caseTrack > .case-winner, #caseTrack > .smoke-sprite:has(.case-winner) {
+        outline: 2px solid #ffb956;
+        outline-offset: -2px;
+        box-shadow: 0 0 18px #ffd487;
+        border-radius: 12px;
+    }
+    .case-opening #caseReel::after { background: #fff5cb; box-shadow: 0 0 9px #ff57a1; }
+    .case-revealed .unlock-card { animation: caseReward 650ms cubic-bezier(.2,.8,.2,1) both; }
+    .case-revealed #unlockedName { color: #a8326b; font-size: 25px; }
+    .case-revealed #unlockedImg { animation: caseCatEnter 700ms cubic-bezier(.16,1,.3,1) both; }
+    .case-revealed #unlockedName { animation: caseTextEnter 550ms 150ms ease-out both; }
+    .case-burst { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; border-radius: 20px; }
+    .case-burst span {
+        position: absolute; left: 50%; top: 45%; width: 7px; height: 12px;
+        border-radius: 3px; background: var(--spark-color);
+        animation: caseSpark 1600ms ease-out both;
+    }
+    @keyframes caseCharge {
+        0% { opacity: 0; transform: translateY(20px) scale(.65) rotate(-4deg); filter: drop-shadow(0 0 0 #ff69a6); }
+        30% { opacity: 1; transform: translateY(0) scale(.98) rotate(3deg); }
+        55% { transform: translateY(-6px) scale(1.04) rotate(-4deg); }
+        75% { transform: translateY(-4px) scale(1.08) rotate(4deg); }
+        100% { opacity: 1; transform: translateY(-8px) scale(1.16); filter: drop-shadow(0 0 24px #ff69a6); }
+    }
+    @keyframes caseWindowEnter { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: none; } }
+    @keyframes caseHalo { from { opacity: .45; transform: scale(.9); } to { opacity: 1; transform: scale(1.1); } }
+    @keyframes caseReelEnter { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
+    @keyframes caseCatEnter { from { opacity: 0; transform: translateY(16px) scale(.75); } to { opacity: 1; transform: none; } }
+    @keyframes caseTextEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes caseReward {
+        0% { transform: scale(.92); box-shadow: 0 0 65px #fff1cb; }
+        55% { transform: scale(1.035); }
+        100% { transform: scale(1); }
+    }
+    @keyframes caseSpark {
+        from { opacity: 1; transform: translate(-50%, -50%) scale(.4); }
+        to { opacity: 0; transform: translate(var(--spark-x), var(--spark-y)) rotate(var(--spark-turn)) scale(.8); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .case-charge img, .case-revealed .unlock-card, .case-burst span { animation: none; }
+        .case-opening .unlock-card, .case-opening .unlock-card::before,
+        .case-opening #caseReel, .case-revealed #unlockedImg,
+        .case-revealed #unlockedName { animation: none; }
+        .case-charge, .case-opening #caseReel { transition: none; }
+        .case-burst { display: none; }
+    }
+    </style>
+    <link rel="stylesheet" href="skin-smoke.css">
+    <script src="skin-smoke.js" defer></script>
+</head>
+<body>
+    <header>
+        <a class="back" href="index.html">← К игре</a>
+        <div class="wallet">
+            <span class="pink-coin">$</span>
+            <span id="balance">0</span>
+        </div>
+    </header>
+
+    <main>
+        <h1>🐈 могшоп</h1>
+        <p class="intro">копи монетки, чтоб открыть кошек.</p>
+        <h2>ксго симулятор</h2>
+        <p class="intro">случайный кот внутри. за повтор повтор вернется половина цены.</p>
+        <div id="cases" class="gallery"></div>
+        <h2>все кошки</h2>
+        <div id="gallery" class="gallery"></div>
+        <p id="status" role="status" aria-live="polite"></p>
+    </main>
+
+    <div id="unlockScreen" class="unlock-screen">
+    <div class="unlock-card">
+        <p id="unlockTitle">✨ новый скин открыт!</p>
+        <div id="caseReel" hidden><div id="caseTrack"></div></div>
+        <img id="unlockedImg" src="" alt="">
+        <h2 id="unlockedName"></h2>
+        <button id="unlockClose">забрать 🐾</button>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
+<script>
+
+if (!localStorage.getItem("catTestBackup")) {
+  localStorage.setItem("catTestBackup", JSON.stringify({
+    catCoins: localStorage.getItem("catCoins"),
+    catUnlockedSkins: localStorage.getItem("catUnlockedSkins"),
+    catSelectedSkin: localStorage.getItem("catSelectedSkin")
+  }));
+}
+localStorage.setItem("catCoins", "676967");
+
+    const skinFirebaseConfig = {
+        apiKey: "AIzaSyDY--fy5EtcBGIU9rcSx2iXNBUSkAa6mJ0",
+        authDomain: "kitten-game-b6abb.firebaseapp.com",
+        projectId: "kitten-game-b6abb",
+        storageBucket: "kitten-game-b6abb.firebasestorage.app",
+        messagingSenderId: "118171282886",
+        appId: "1:118171282886:web:e8b3856dd7bba511b3d6c7"
+    };
+
+    firebase.initializeApp(skinFirebaseConfig);
+
+    const skinAuth = firebase.auth();
+    const skinDb = firebase.firestore();
+
+    async function syncCoinsToLeaderboard(value) {
+        const nick = localStorage.getItem("catNickname");
+
+        if (!nick) return;
+
+        try {
+            const result = await skinAuth.signInAnonymously();
+
+            await skinDb.collection("players")
+                .doc(result.user.uid)
+                .set({
+                    nick: nick,
+                    coins: Number(value) || 0
+                }, { merge: true });
+
+        } catch (error) {
+            console.error("монетки не синхронизировались:", error);
+        }
+    }
+</script>
+
+    <script>
+        const skins = [
+            { id: "default", name: "чокнутая кошка", image: null, price: 0 },
+            { id: "gym", name: "батя", image: "skins/cat-gym.png", price: 100 },
+            { id: "burger", name: "жыр", image: "skins/cat-burger.png", price: 175 },
+            { id: "jump", name: "бедалага", image: "skins/cat-jump.png", price: 255 },
+            { id: "fridge", name: "плакса", image: "skins/cat-fridge.png", price: 333 },
+            { id: "shadow", name: "сукадьявол", image: "skins/cat-shadow.png", price: 450 },
+            { id: "mask", name: "анонимен", image: "skins/cat-mask.png", price: 666 },
+            { id: "boss", name: "folkswagen", image: "skins/cat-boss.png", price: 1067 }
+        ];
+
+
+        const cases = [
+            { name: "норм кейс", price: 180, skins: ["gym", "burger", "jump"] },
+            { name: "чотенький кейс", price: 390, skins: ["fridge", "shadow"] },
+            { name: "нихеровый кейс", price: 870, skins: ["mask", "boss"] }
+        ];
+        let caseOpening = false;
+        const casesGallery = document.getElementById("cases");
+        const caseReel = document.getElementById("caseReel");
+        const caseTrack = document.getElementById("caseTrack");
+
+        const unlockTitle = document.getElementById("unlockTitle");
+        const unlockClose = document.getElementById("unlockClose");
+
+        const gallery = document.getElementById("gallery");
+        const balance = document.getElementById("balance");
+        const status = document.getElementById("status");
+        const unlockScreen = document.getElementById("unlockScreen");
+        const unlockedImg = document.getElementById("unlockedImg");
+        const unlockedName = document.getElementById("unlockedName");
+
+        document.getElementById("unlockClose").addEventListener("click", function () {
+            unlockScreen.classList.remove("show");
+            unlockScreen.classList.remove("case-opening", "case-revealed");
+            unlockScreen.querySelectorAll(".case-burst, .case-charge").forEach(node => node.remove());
+        });
+        const numberFormat = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
+
+        let owned;
+        try {
+            const saved = JSON.parse(localStorage.getItem("catUnlockedSkins") || "[]");
+            owned = new Set(Array.isArray(saved) ? saved : []);
+        } catch {
+            owned = new Set();
+        }
+        owned.add("default");
+
+        let selected = localStorage.getItem("catSelectedSkin") || "default";
+        if (!owned.has(selected)) selected = "default";
+
+        function getCoins() {
+            return Number(localStorage.getItem("catCoins")) || 0;
+        }
+
+        function renderGallery() {
+            const coins = getCoins();
+            balance.textContent = numberFormat.format(coins);
+            renderCases();
+            gallery.replaceChildren();
+
+            for (const skin of skins) {
+                const unlocked = owned.has(skin.id);
+                const card = document.createElement("article");
+                card.className = "skin" + (unlocked ? "" : " locked") +
+                    (selected === skin.id ? " selected" : "");
+
+                const preview = document.createElement("div");
+                preview.className = "preview";
+                if (skin.image) {
+                    const img = document.createElement("img");
+                    img.src = skin.image;
+                    img.alt = skin.name;
+                    preview.append(img);
+                } else {
+                    preview.textContent = "🐈‍⬛";
+                }
+
+                const title = document.createElement("h2");
+                title.textContent = skin.name;
+
+                const cost = document.createElement("p");
+                cost.className = "cost";
+                cost.textContent = unlocked ? "открыт" : skin.price + " бабоса";
+
+                const button = document.createElement("button");
+                if (!unlocked) {
+                    button.textContent = "открыть за " + skin.price + " бабоса 🪙";
+                    button.disabled = coins < skin.price;
+                    button.addEventListener("click", function () {
+                        const currentCoins = getCoins();
+                        if (currentCoins < skin.price) return;
+                        const remaining = Math.round((currentCoins - skin.price) * 10) / 10;
+                        localStorage.setItem("catCoins", String(remaining));
+                        syncCoinsToLeaderboard(remaining);
+                        owned.add(skin.id);
+                        localStorage.setItem("catUnlockedSkins", JSON.stringify([...owned]));
+                        selected = skin.id;
+                        localStorage.setItem("catSelectedSkin", selected);
+                        status.textContent = "открыт скин «" + skin.name + "»!";
+                        renderGallery();
+                        unlockTitle.textContent = "✨ новый скин открыт!";
+                        caseReel.hidden = true;
+                        unlockedImg.hidden = false;
+                        unlockClose.disabled = false;
+                        unlockedImg.src = skin.image;
+                        unlockedImg.alt = skin.name;
+                        unlockedName.textContent = skin.name;
+                        unlockScreen.classList.add("show"); 
+                    });
+                } else if (selected === skin.id) {
+                    button.textContent = "выбран ✓";
+                    button.disabled = true;
+                } else {
+                    button.textContent = "выбрать";
+                    button.addEventListener("click", function () {
+                        selected = skin.id;
+                        localStorage.setItem("catSelectedSkin", selected);
+                        status.textContent = "выбран скин «" + skin.name + "»";
+                        renderGallery();
+                    });
+                }
+
+                card.append(preview, title, cost, button);
+                gallery.append(card);
+            }
+        }
+
+
+
+        function renderCases() {
+            const coins = getCoins();
+            casesGallery.replaceChildren();
+            for (const box of cases) {
+                const card = document.createElement("article");
+                card.className = "skin case-card";
+                const icon = document.createElement("img");
+                icon.className = "case-icon";
+                icon.src = "skins/case-pink.png";
+                icon.alt = "енто кейс";
+                const title = document.createElement("h2");
+                title.textContent = box.name;
+                const contents = document.createElement("p");
+                contents.className = "case-contents";
+                contents.textContent = box.skins
+                    .map(id => skins.find(skin => skin.id === id).name).join(" · ");
+                const odds = document.createElement("p");
+                odds.className = "case-odds";
+                odds.textContent = "шанс каждого — 1 из " + box.skins.length;
+                const button = document.createElement("button");
+                button.type = "button";
+                button.textContent = "открыть за " + box.price + " монет";
+                button.disabled = caseOpening || coins < box.price;
+                button.addEventListener("click", function () { openCase(box); });
+                card.append(icon, title, contents, odds, button);
+                casesGallery.append(card);
+            }
+        }
+
+        function openCase(box) {
+            if (caseOpening) return;
+            const coins = getCoins();
+            if (coins < box.price) {
+                status.textContent = "на этот кейсик пока не хватает монет, зай((.";
+                renderGallery();
+                return;
+            }
+            // Обновляем коллекцию: покупка могла произойти в другой вкладке.
+            try {
+                const saved = JSON.parse(localStorage.getItem("catUnlockedSkins") || "[]");
+                if (Array.isArray(saved)) saved.forEach(id => owned.add(id));
+            } catch {}
+            const pool = box.skins.map(id => skins.find(skin => skin.id === id));
+            const winner = pool[Math.floor(Math.random() * pool.length)];
+            const duplicate = owned.has(winner.id);
+            const refund = duplicate ? box.price / 2 : 0;
+            const nextOwned = new Set(owned);
+            nextOwned.add(winner.id);
+            const remaining = coins - box.price + refund;
+
+            // Результат сохраняется до прокрутки и не теряется при обновлении.
+            try {
+                localStorage.setItem("catCoins", String(remaining));
+                localStorage.setItem("catUnlockedSkins", JSON.stringify([...nextOwned]));
+                localStorage.setItem("catSelectedSkin", winner.id);
+                syncCoinsToLeaderboard(remaining);
+            } catch (error) {
+                console.error(error);
+                status.textContent = "не удалось сохранить результат. проверь доступность хранилища браузера.";
+                return;
+            }
+            owned = nextOwned;
+            selected = winner.id;
+            caseOpening = true;
+            renderGallery();
+
+            unlockScreen.classList.remove("case-revealed");
+            unlockScreen.classList.add("case-opening");
+            unlockScreen.querySelectorAll(".case-burst, .case-charge").forEach(node => node.remove());
+            unlockTitle.textContent = "сейчас чета будэ...";
+            unlockedName.textContent = "";
+            unlockedImg.hidden = true;
+            unlockClose.disabled = true;
+            caseReel.hidden = true;
+            caseReel.classList.remove("case-fading");
+            caseTrack.style.transition = "none";
+            caseTrack.style.transform = "translateX(0)";
+            caseTrack.replaceChildren();
+
+            const winningPosition = 28;
+            for (let i = 0; i < 35; i++) {
+                const skin = i === winningPosition
+                    ? winner : pool[Math.floor(Math.random() * pool.length)];
+                const img = document.createElement("img");
+                img.src = skin.image;
+                img.alt = skin.name;
+                caseTrack.append(img);
+            }
+            unlockScreen.classList.add("show");
+            const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            const charge = document.createElement("div");
+            charge.className = "case-charge";
+            const chargeImage = document.createElement("img");
+            chargeImage.src = "skins/case-pink.png";
+            chargeImage.alt = "кейс открывается";
+            charge.append(chargeImage);
+            caseReel.before(charge);
+
+            setTimeout(function () {
+            charge.classList.add("case-fading");
+            setTimeout(() => charge.remove(), reduceMotion ? 0 : 350);
+            caseReel.hidden = false;
+            unlockTitle.textContent = "ловим твоего васька…";
+            const offset = caseReel.clientWidth / 2 - (winningPosition * 112 + 50);
+            void caseTrack.offsetWidth;
+            caseTrack.style.transition = reduceMotion
+                ? "none" : "transform 5200ms cubic-bezier(0.12, 0.72, 0.12, 1)";
+            caseTrack.style.transform = "translateX(" + offset + "px)";
+
+            setTimeout(function () {
+                const winningImage = caseTrack.querySelectorAll("img")[winningPosition];
+                if (winningImage) winningImage.classList.add("case-winner");
+                unlockTitle.textContent = "Вот он…";
+                setTimeout(function () {
+                caseReel.classList.add("case-fading");
+                setTimeout(function () {
+                caseReel.hidden = true;
+                unlockScreen.classList.add("case-revealed");
+                if (!reduceMotion) {
+                    const burst = document.createElement("div");
+                    burst.className = "case-burst";
+                    burst.setAttribute("aria-hidden", "true");
+                    for (let i = 0; i < 22; i++) {
+                        const spark = document.createElement("span");
+                        const angle = i / 22 * Math.PI * 2;
+                        spark.style.setProperty("--spark-x", Math.cos(angle) * 150 + "px");
+                        spark.style.setProperty("--spark-y", Math.sin(angle) * 190 + "px");
+                        spark.style.setProperty("--spark-turn", i * 47 + "deg");
+                        spark.style.setProperty("--spark-color", ["#ff69a6", "#ffe49b", "#ffffff"][i % 3]);
+                        burst.append(spark);
+                    }
+                    unlockScreen.querySelector(".unlock-card").append(burst);
+                }
+                unlockedImg.src = winner.image;
+                unlockedImg.alt = winner.name;
+                unlockedImg.hidden = false;
+                unlockedName.textContent = winner.name;
+                unlockTitle.textContent = duplicate
+                    ? "повтор! вернется " + refund + " монет"
+                    : "✨ новый котик в коллекции!";
+                status.textContent = duplicate
+                    ? "выпал «" + winner.name + "». возвращено " + refund + " монет."
+                    : "открыт скин «" + winner.name + "»!";
+                caseOpening = false;
+                unlockClose.disabled = false;
+                renderGallery();
+                unlockClose.focus();
+                }, reduceMotion ? 0 : 350);
+                }, reduceMotion ? 0 : 500);
+            }, reduceMotion ? 0 : 5300);
+            }, reduceMotion ? 0 : 1800);
+        }
+
+        renderGallery();
+        syncCoinsToLeaderboard(getCoins());
+    </script>
+
+<script>
+    let pageIsLeaving = false;
+
+    document.addEventListener("click", function (event) {
+        const link = event.target.closest("a[href]");
+
+        if (
+            !link ||
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            event.altKey ||
+            link.hasAttribute("download") ||
+            (link.target && link.target !== "_self")
+        ) {
+            return;
+        }
+
+        const destination = new URL(link.href, window.location.href);
+
+        // Анимируем только переходы между страницами нашей игры.
+        const gamePages = [
+            new URL("index.html", window.location.href).href,
+            new URL("skins.html", window.location.href).href,
+            new URL("leaderboard.html", window.location.href).href
+        ];
+
+        if (
+            !gamePages.includes(destination.href) ||
+            destination.pathname === window.location.pathname
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        if (pageIsLeaving) return;
+        pageIsLeaving = true;
+
+        const reduceMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+        document.body.classList.add("page-leaving");
+
+        setTimeout(function () {
+            window.location.assign(destination.href);
+        }, reduceMotion ? 0 : 180);
+    });
+
+    // Возвращаем видимость при возврате кнопкой браузера «Назад».
+    window.addEventListener("pageshow", function () {
+        pageIsLeaving = false;
+        document.body.classList.remove("page-leaving");
+    });
+</script>
+
+</body>
+</html>

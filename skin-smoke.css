@@ -1,0 +1,85 @@
+.smoke-sprite {
+    position: relative;
+    display: inline-block;
+    isolation: isolate;
+    pointer-events: none;
+    vertical-align: middle;
+    --aura-core: rgba(8, 4, 16, .95);
+    --aura-edge: rgba(44, 20, 65, .6);
+}
+.smoke-sprite.smoke-boss {
+    --aura-core: rgba(255, 255, 255, 1);
+    --aura-edge: rgba(190, 179, 229, .7);
+}
+.smoke-sprite[hidden] { display: none !important; }
+.smoke-sprite.smoke-dog {
+    --aura-core: rgba(240, 207, 154, .95);
+    --aura-edge: rgba(170, 123, 70, .7);
+}
+#dog > .smoke-sprite {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transition: transform 250ms cubic-bezier(.2,.8,.2,1);
+}
+#dog:not(.hit) > .smoke-sprite { animation: dogShow 3000ms ease-in-out forwards; }
+#dog:not(.hit) > .smoke-sprite img { animation: none; }
+#dog.hit > .smoke-sprite { transform: scale(2.75); }
+#dog.hit > .smoke-sprite img { transform: none; }
+.smoke-dog > img { filter: drop-shadow(0 0 5px #e8c591); }
+.smoke-sprite > img { position: relative; z-index: 1; }
+.skin-smoke-cloud {
+    position: absolute;
+    z-index: 0;
+    inset: -14%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 25% 65%, var(--aura-edge), transparent 48%),
+                radial-gradient(ellipse at 75% 40%, var(--aura-edge), transparent 48%);
+    filter: blur(9px);
+    opacity: .5;
+    animation: auraHaze 4s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+.aura-dust, .aura-spark {
+    position: absolute;
+    z-index: 2;
+    width: var(--dust-size, 3px);
+    height: var(--dust-size, 3px);
+    border-radius: 50%;
+    background: var(--aura-core);
+    box-shadow: 0 0 4px var(--aura-edge);
+    pointer-events: none;
+    opacity: 0;
+}
+.aura-dust {
+    left: var(--dust-x);
+    top: var(--dust-y);
+    animation: auraDustFloat 3.8s linear infinite;
+    animation-delay: var(--dust-delay);
+}
+.smoke-boss .aura-dust, .smoke-boss .aura-spark { box-shadow: 0 0 3px #fff, 0 0 5px #aa9eb9; }
+.smoke-mask > img { filter: drop-shadow(0 0 5px #30163e77); }
+.smoke-boss > img { filter: drop-shadow(0 0 6px #ffffffbb); }
+.skin.locked .smoke-sprite > img { filter: blur(9px); }
+@keyframes auraHaze {
+    from { opacity: .3; transform: translateY(3px); }
+    to { opacity: .6; transform: translateY(-5px); }
+}
+@keyframes auraDustFloat {
+    0% { opacity: 0; transform: translate(0, 8px); }
+    25% { opacity: .8; }
+    65% { opacity: .5; }
+    100% { opacity: 0; transform: translate(var(--dust-drift), -28px); }
+}
+#cat > .smoke-sprite, .preview > .smoke-sprite { width: 100%; height: 100%; }
+#cat > .smoke-sprite > img { width: 100%; height: 100%; object-fit: contain; }
+#caseTrack > .smoke-sprite { flex: 0 0 100px; width: 100px; height: 90px; }
+#caseTrack > .smoke-sprite > img { display: block; width: 100%; height: 100%; }
+.unlock-card > .smoke-sprite { width: 180px; height: 180px; }
+.unlock-card > .smoke-sprite > img { width: 100%; height: 100%; object-fit: contain; }
+@media (prefers-reduced-motion: reduce) {
+    .skin-smoke-cloud { animation: none; opacity: .4; }
+    .aura-dust { animation: none; opacity: .45; }
+    #dog:not(.hit) > .smoke-sprite { animation: none; }
+    #dog > .smoke-sprite { transition: none; }
+}

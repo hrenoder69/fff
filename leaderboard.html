@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Таблица лидеров</title>
+  <style>
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #fff0f5;
+      color: #4b2840;
+      font-family: Arial, sans-serif;
+    }
+
+    main { max-width: 750px; margin: 20px auto; }
+    a { color: #b83276; font-weight: bold; }
+    h1 { text-align: center; color: #b83276; }
+
+    .board {
+      padding: 12px;
+      background: white;
+      border: 3px solid #ff91bb;
+      border-radius: 22px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 60px minmax(0, 1fr) 110px 100px;
+      gap: 8px;
+      padding: 14px 10px;
+      border-bottom: 1px solid #f6c7da;
+      align-items: center;
+    }
+
+    .row:last-child { border-bottom: 0; }
+    .heading { font-weight: bold; color: #a33d70; }
+    .row span:nth-child(2) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .first  { background: #ffe8a6; border-radius: 12px; }
+    .second { background: #e8e7ef; border-radius: 12px; }
+    .third  { background: #f7d7c4; border-radius: 12px; }
+
+    button {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 22px;
+      border: 0;
+      border-radius: 14px;
+      background: #ff69a6;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #status { text-align: center; }
+
+    @media (max-width: 480px) {
+      .row { grid-template-columns: 34px minmax(0, 1fr) 62px 65px; gap: 5px; padding: 12px 4px; font-size: 12px; }
+    }
+
+body {
+    background:
+        radial-gradient(circle at 10% 15%, #ffe0ed, transparent 32%),
+        radial-gradient(circle at 90% 85%, #ffeacb, transparent 32%),
+        #fff8fc;
+}
+
+main > a:first-child {
+    display: inline-block;
+    padding: 10px 17px;
+    border-radius: 999px;
+    background: white;
+    box-shadow: 0 4px 0 #f3bfd5;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+h1 {
+    text-shadow: 0 4px 0 #ffd3e5;
+}
+
+.board {
+    padding: 12px;
+    background: white;
+    border-radius: 28px;
+    box-shadow: 0 10px 0 #f5c7db, 0 22px 35px #b74e7b22;
+}
+
+.row.heading {
+    border-radius: 16px;
+    background: #ffe6f1;
+    color: #a33168;
+    font-weight: 900;
+}
+
+#players {
+    display: grid;
+    gap: 10px;
+    padding-top: 10px;
+}
+
+#players > .row {
+    border: 2px solid #f2cfdf;
+    border-radius: 16px;
+    background: #fff8fc;
+    box-shadow: 0 4px 0 #f8dbe7;
+    animation: rowPop .4s ease-out backwards;
+}
+
+#players > .row:nth-child(1) {
+    background: linear-gradient(100deg, #ffedac, #fff9e7);
+    border-color: #ecc358;
+}
+
+#players > .row:nth-child(2) {
+    background: linear-gradient(100deg, #e9ebf2, #ffffff);
+    border-color: #bdc3d2;
+}
+
+#players > .row:nth-child(3) {
+    background: linear-gradient(100deg, #f4d4ba, #fff5ed);
+    border-color: #dca879;
+}
+
+#players > .row:nth-child(1) span:first-child::before { content: "🥇 "; }
+#players > .row:nth-child(2) span:first-child::before { content: "🥈 "; }
+#players > .row:nth-child(3) span:first-child::before { content: "🥉 "; }
+
+#players > .row span:nth-child(2) {
+    overflow-wrap: anywhere;
+}
+
+#players > .row span:last-child {
+    color: #94335f;
+    font-weight: 900;
+}
+
+@keyframes rowPop {
+    from { opacity: 0; transform: translateY(12px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes pageAppear {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+body {
+    animation: pageAppear 220ms ease-out;
+    transition: opacity 180ms ease;
+}
+
+body.page-leaving {
+    opacity: 0;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body {
+        animation: none;
+        transition: none;
+    }
+}
+
+  </style>
+</head>
+<body>
+  <main>
+    <a href="index.html">← обратно к кошке</a>
+    <h1>🏆 таблица лидеров</h1>
+
+    <div class="board">
+      <div class="row heading">
+        <span>место</span>
+        <span>чуваки</span>
+        <span>рекорд</span>
+        <span>монетки</span>
+      </div>
+      <div id="players"></div>
+    </div>
+
+    <button id="more" hidden>показать ещё</button>
+    <p id="status" role="status">загружаем рекорды...</p>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+ apiKey: "AIzaSyDY--fy5EtcBGIU9rcSx2iXNBUSkAa6mJ0",
+ authDomain: "kitten-game-b6abb.firebaseapp.com",
+ projectId: "kitten-game-b6abb",
+ storageBucket: "kitten-game-b6abb.firebasestorage.app",
+ messagingSenderId: "118171282886",
+ appId: "1:118171282886:web:e8b3856dd7bba511b3d6c7"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    const players = document.getElementById("players");
+    const more = document.getElementById("more");
+    const status = document.getElementById("status");
+
+    let lastPlayer = null;
+    let place = 0;
+
+    async function loadPlayers() {
+      more.disabled = true;
+
+        try {
+          const session = await auth.signInAnonymously();
+          // При первом открытии таблицы обновляем свой текущий баланс.
+          if (!lastPlayer && localStorage.getItem("catNickname")) {
+              try {
+                  const ownRef = db.collection("players").doc(session.user.uid);
+                  const ownDoc = await ownRef.get();
+                  const localCoins = Number(localStorage.getItem("catCoins"));
+                  if (ownDoc.exists && Number.isFinite(localCoins)) {
+                      await ownRef.set({ coins: Math.max(0, localCoins) }, { merge: true });
+                  }
+              } catch (error) {
+                  console.error("Не удалось обновить монетки:", error);
+              }
+          }
+
+        let request = db.collection("players")
+          .orderBy("record", "desc")
+          .limit(30);
+
+        if (lastPlayer) request = request.startAfter(lastPlayer);
+
+        const page = await request.get();
+
+        for (const playerDoc of page.docs) {
+            place++;
+            const player = playerDoc.data();
+            const row = document.createElement("div");
+
+          row.className = "row";
+          if (place === 1) row.classList.add("first");
+          if (place === 2) row.classList.add("second");
+          if (place === 3) row.classList.add("third");
+
+          const number = document.createElement("span");
+          const nick = document.createElement("span");
+          const record = document.createElement("span");
+          const coins = document.createElement("span");
+
+          number.textContent = place;
+          nick.textContent = player.nick;
+          record.textContent = player.record + " тапов";
+
+          const savedCoins = Number(player.coins);
+          coins.textContent = Number.isFinite(savedCoins)
+              ? Math.max(0, savedCoins).toLocaleString("ru-RU", { maximumFractionDigits: 1 })
+              : "—";
+          row.append(number, nick, record, coins);
+          players.append(row);
+        }
+
+        lastPlayer = page.docs[page.docs.length - 1] || lastPlayer;
+        more.textContent = "показать еще";
+        more.hidden = page.size < 30;
+        status.textContent = place === 0 ? "пока чуваков нет" : "";
+         } catch (error) {
+           console.error(error);
+            status.textContent = "не получилось загрузить таблицу";
+            more.hidden = false;
+            more.textContent = "попробовать снова";
+          } finally {
+            more.disabled = false;
+          }
+    }
+
+    more.addEventListener("click", loadPlayers);
+    loadPlayers();
+  </script>
+
+<script>
+    let pageIsLeaving = false;
+
+    document.addEventListener("click", function (event) {
+        const link = event.target.closest("a[href]");
+
+        if (
+            !link ||
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            event.altKey ||
+            link.hasAttribute("download") ||
+            (link.target && link.target !== "_self")
+        ) {
+            return;
+        }
+
+        const destination = new URL(link.href, window.location.href);
+
+        // Анимируем только переходы между страницами нашей игры.
+        const gamePages = [
+            new URL("index.html", window.location.href).href,
+            new URL("skins.html", window.location.href).href,
+            new URL("leaderboard.html", window.location.href).href
+        ];
+
+        if (
+            !gamePages.includes(destination.href) ||
+            destination.pathname === window.location.pathname
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        if (pageIsLeaving) return;
+        pageIsLeaving = true;
+
+        const reduceMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+        document.body.classList.add("page-leaving");
+
+        setTimeout(function () {
+            window.location.assign(destination.href);
+        }, reduceMotion ? 0 : 180);
+    });
+
+    // Возвращаем видимость при возврате кнопкой браузера «Назад».
+    window.addEventListener("pageshow", function () {
+        pageIsLeaving = false;
+        document.body.classList.remove("page-leaving");
+    });
+</script>
+
+</body>
+</html>
